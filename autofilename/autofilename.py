@@ -112,7 +112,7 @@ class InsertDimensionsCommand(sublime_plugin.TextCommand):
         if path.startswith(("'", "\"", "(")):
             path = path[1:-1]
 
-        path = path[path.rfind(FileNameComplete.sep)                    :] if FileNameComplete.sep in path else path
+        path = path[path.rfind(FileNameComplete.sep):] if FileNameComplete.sep in path else path
         full_path = self.this_dir + path
 
         if self.img_tag_in_region(tag_scope) and path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
