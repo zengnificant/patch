@@ -112,7 +112,8 @@ class InsertDimensionsCommand(sublime_plugin.TextCommand):
         if path.startswith(("'", "\"", "(")):
             path = path[1:-1]
 
-        path = path[path.rfind(FileNameComplete.sep):] if FileNameComplete.sep in path else path
+        path = path[path.rfind(FileNameComplete.sep)
+                               :] if FileNameComplete.sep in path else path
         full_path = self.this_dir + path
 
         if self.img_tag_in_region(tag_scope) and path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
@@ -230,7 +231,6 @@ class FileNameComplete(sublime_plugin.EventListener):
         sel = view.sel()[0].a
         this_dir = ""
         completions = []
-
         if uses_keybinding and not FileNameComplete.is_active:
             return
         if not any(s in view.scope_name(sel) for s in valid_scopes):
@@ -239,6 +239,11 @@ class FileNameComplete(sublime_plugin.EventListener):
             return
 
         cur_path = self.get_cur_path(view, sel)
+        _name = view.scope_name(
+            sel)
+        at_string_of_js = '.js' in _name and 'string.quoted' in _name
+        if cur_path == ''and at_string_of_js:
+            return (completions, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
 
         if cur_path.startswith('/') or cur_path.startswith('\\'):
             if is_proj_rel:
