@@ -112,8 +112,7 @@ class InsertDimensionsCommand(sublime_plugin.TextCommand):
         if path.startswith(("'", "\"", "(")):
             path = path[1:-1]
 
-        path = path[path.rfind(FileNameComplete.sep)
-                               :] if FileNameComplete.sep in path else path
+        path = path[path.rfind(FileNameComplete.sep):] if FileNameComplete.sep in path else path
         full_path = self.this_dir + path
 
         if self.img_tag_in_region(tag_scope) and path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
@@ -198,6 +197,7 @@ class FileNameComplete(sublime_plugin.EventListener):
                                   'next_completion_if_showing': False})
         else:
             FileNameComplete.is_active = False
+            return
 
     def fix_dir(self, sdir, fn):
         if fn.endswith(('.png', '.jpg', '.jpeg', '.gif')):
@@ -228,6 +228,9 @@ class FileNameComplete(sublime_plugin.EventListener):
         blacklist = self.get_setting('afn_blacklist_scopes', view)
         uses_keybinding = self.get_setting('afn_use_keybinding', view)
 
+        def getPureCompletions(completions):
+            return (completions, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+
         sel = view.sel()[0].a
         this_dir = ""
         completions = []
@@ -243,7 +246,7 @@ class FileNameComplete(sublime_plugin.EventListener):
             sel)
         at_string_of_js = '.js' in _name and 'string.quoted' in _name
         if cur_path == ''and at_string_of_js:
-            return (completions, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+            return getPureCompletions(completions)
 
         if cur_path.startswith('/') or cur_path.startswith('\\'):
             if is_proj_rel:
@@ -267,7 +270,7 @@ class FileNameComplete(sublime_plugin.EventListener):
             return self.get_drives()
         self.showing_win_drives = False
         if not os.path.isdir(this_dir):
-            return
+            return getPureCompletions(completions)
         dir_files = os.listdir(this_dir)
 
         for d in dir_files:
@@ -276,6 +279,7 @@ class FileNameComplete(sublime_plugin.EventListener):
             if not '.' in d:
                 d += FileNameComplete.sep
             completions.append((self.fix_dir(this_dir, d), d))
+
         if completions:
             InsertDimensionsCommand.this_dir = this_dir
             return completions
